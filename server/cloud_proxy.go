@@ -28,6 +28,7 @@ const (
 	defaultCloudProxyBaseURL      = "https://ollama.com:443"
 	defaultCloudProxySigningHost  = "ollama.com"
 	cloudProxyBaseURLEnv          = "OLLAMA_CLOUD_BASE_URL"
+	cloudProxyAPIKeyEnv           = "OLLAMA_API_KEY"
 	legacyCloudAnthropicKey       = "legacy_cloud_anthropic_web_search"
 	cloudProxyClientVersionHeader = "X-Ollama-Client-Version"
 
@@ -359,6 +360,11 @@ func writeCloudUnauthorized(c *gin.Context) {
 
 func signCloudProxyRequest(ctx context.Context, req *http.Request) error {
 	if !strings.EqualFold(req.URL.Hostname(), cloudProxySigningHost) {
+		return nil
+	}
+
+	if key := strings.TrimSpace(envconfig.Var(cloudProxyAPIKeyEnv)); key != "" {
+		req.Header.Set("Authorization", "Bearer "+key)
 		return nil
 	}
 
